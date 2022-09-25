@@ -17,13 +17,17 @@ func main() {
 		return
 	}
 	defer conn.Close()
-	packet := common.NewTCP_Packet()
-	init_seq := packet.SEQ
-	is_sent := false
+	packet := common.NewTCP_Packet() //create a new packet to establish connection
+	init_seq := packet.SEQ           //we set default sequence number to be 1000
+	is_sent := false                 //this state represent if our client has sent all the packets or not
 	var last_seq int
-	
+
+	msg_byte_array := []byte(msg)
+	msg_byte_array_size := len(msg_byte_array)
+	var index int = 0 // for packet index
+
 	for {
-		buf := [512]byte{}
+		buf := [512]byte{} //create a buffer to send and recieve the message
 		switch packet.OPCODE {
 		case common.UNSTART:
 			packet.OPCODE = common.SYN
@@ -32,21 +36,21 @@ func main() {
 				fmt.Println("Failed to Marshal", err)
 				return
 			}
-			fmt.Println("Start to send the information seq:",packet.SEQ)
-			conn.Write(buf)
+			fmt.Println("Start to send the SYN for first hand-shake:", packet.SEQ)
+			conn.Write(buf) //staring first hand-shake
 		case common.SYN:
 			n, err := conn.Read(buf[:])
 			if err != nil {
-				fmt.Println("recv failed, err:", err,40)
+				fmt.Println("recv failed, err:", err, 40)
 				return
 			}
 			err = json.Unmarshal(buf[:n], &packet)
 			if err != nil {
-				fmt.Println("Unmarshal failed, err:", err,58)
+				fmt.Println("Unmarshal failed, err:", err, 58)
 				return
 			}
-			if packet.OPCODE == common.SYN_ACK && packet.ACK == (init_seq+1) {
-				fmt.Println("Receive the ACK",packet.ACK,"SEQ:",packet.SEQ)
+			if packet.OPCODE == common.SYN_ACK && packet.ACK == (init_seq+1) { //make sure the sequence number is matched
+				fmt.Println("Receive the SYN_ACK for second hand-shake", packet.ACK, "SEQ:", packet.SEQ)
 				packet.OPCODE = common.ACK
 				packet.ACK = packet.SEQ + 1
 				packet.SEQ = init_seq + 1
@@ -55,50 +59,54 @@ func main() {
 					fmt.Println("Failed to Marshal", err)
 					return
 				}
-				time.Sleep(1000)
-				fmt.Println("Send the ACK:",packet.ACK,"seq:",packet.SEQ)
+
+				fmt.Println("Send the ACK for the third hand shake, ACK:", packet.ACK, "seq:", packet.SEQ)
 				conn.Write(buf)
-				time.Sleep(1000)
-				
-				packet.OPCODE = common.ESTABLISHED
+				time.Sleep(1 * time.Second) //to avoid sticking packets and create a ideal condition for our experiment
+
+				packet.OPCODE = common.ESTABLISHED //connection build
 			}
 		case common.ESTABLISHED:
-			if !is_sent {
-				msg_byte_array:=[]byte(msg)
-				msg_byte_array_size:=len(msg_byte_array)	
-				for i := 0; i < msg_byte_array_size; i += common.MAX_DATA_SIZE {
-					if i+common.MAX_DATA_SIZE< msg_byte_array_size{
-						copy(packet.DATA[:], msg_byte_array[i:(i+common.MAX_DATA_SIZE)])
-					}else{
-						copy(packet.DATA[0:(msg_byte_array_size-i)], msg_byte_array[i:])	
-						tmp:=[common.MAX_DATA_SIZE]byte{0}
-						copy(packet.DATA[(msg_byte_array_size-i):],tmp[:])
-					}
-					packet.SEQ++
-					buf, err := json.Marshal(packet)
-					if err != nil {
-						fmt.Println("Failed to Marshal", err)
-						return
-					}
-					last_seq = packet.SEQ
-					time.Sleep(1000)
-					conn.Write(buf[:])
-					time.Sleep(1000)	
+			if !is_sent { //keep sending data packets until the end of the message
+				if index+common.MAX_DATA_SIZE < msg_byte_array_size { //if it is not the last packet
+					copy(packet.DATA[:], msg_byte_array[index:(index+common.MAX_DATA_SIZE)])
+					index += len(packet.DATA)
+				} else { //if it is the last packet
+					copy(packet.DATA[0:(msg_byte_array_size-index)], msg_byte_array[index:])
+					tmp := [common.MAX_DATA_SIZE]byte{0}
+					copy(packet.DATA[(msg_byte_array_size-index):], tmp[:])
+					is_sent = true //after finish sending all the packets, set state to true
+					//fmt.Println(packet.DATA)
 				}
-				is_sent = true
+				packet.SEQ++
+
+				buf, err := json.Marshal(packet)
+				if err != nil {
+					fmt.Println("Failed to Marshal", err)
+					return
+				}
+				last_seq = packet.SEQ
+				//time.Sleep(1 * time.Second)
+				fmt.Println("Sending data with seq:", packet.SEQ)
+				conn.Write(buf[:])
+				time.Sleep(1 * time.Second)
 				break
 			}
+			fmt.Println("repeat listening")
 			n, err := conn.Read(buf[:])
 			if err != nil {
-				fmt.Println("recv failed, err:", err,78)
+				fmt.Println("recv failed, err:", err, 78)
 				return
 			}
 			err = json.Unmarshal(buf[:n], &packet)
 			if err != nil {
-				fmt.Println("Unmarshal failed, err:", err,97)
+				fmt.Println("Unmarshal failed, err:", err, 97)
 				return
 			}
-			if packet.SEQ == last_seq+1 {
+			fmt.Println("Receive the ACK for packet seq:", packet.SEQ)
+
+			if packet.ACK == last_seq+1 { // already get the last ack, job finished, then send exit packet to server
+				fmt.Println("Receive the last ack, seq:", packet.SEQ)
 				packet.SEQ++
 				packet.IS_EXIT = true
 				buf, err := json.Marshal(packet)
@@ -106,9 +114,8 @@ func main() {
 					fmt.Println("Failed to Marshal", err)
 					return
 				}
-				time.Sleep(1000)	
+				time.Sleep(1 * time.Second)
 				conn.Write(buf)
-				time.Sleep(1000)	
 				return
 			}
 		}
