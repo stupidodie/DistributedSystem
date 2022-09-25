@@ -103,7 +103,7 @@ func main() {
 				fmt.Println("Unmarshal failed, err:", err, 97)
 				return
 			}
-			fmt.Println("Receive the ACK for packet seq:", packet.SEQ)
+			fmt.Println("Receive the ACK for packet",packet.ACK," seq:", packet.SEQ)
 
 			if packet.ACK == last_seq+1 { // already get the last ack, job finished, then send exit packet to server
 				fmt.Println("Receive the last ack, seq:", packet.SEQ)
