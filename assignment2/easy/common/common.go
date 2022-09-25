@@ -17,7 +17,7 @@ type TCP_Packet struct {
 	ACK     int                 `json:"ack"`
 }
 
-func NewTCP_Packet() TCP_Packet {
+func NewTCP_Init_Packet() TCP_Packet {
 	return TCP_Packet{
 		OPCODE:  UNSTART,
 		SEQ:     1000,
@@ -26,6 +26,18 @@ func NewTCP_Packet() TCP_Packet {
 		ACK:     0,
 	}
 }
+func NewTCP_Specific_Packet(Seq int,Ack int,opcode int) TCP_Packet {
+	return TCP_Packet{
+		OPCODE: opcode,
+		SEQ:     Seq,
+		IS_EXIT: false,
+		DATA:    [MAX_DATA_SIZE]byte{0},
+		ACK:     Ack,
+	}
+}
+
+
+
 
 const ADDRESS = "127.0.0.1:20000"
 const PROTOCOL_TYPE = "tcp"
