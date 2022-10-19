@@ -46,12 +46,12 @@ func main() {
 		id:                 -1,
 		local_vector_clock: Vector_clock{},
 	}
-	waitForTimeRequest(&client)
+	waitForRequest(&client)
 	// Wait for the client (user) to ask for the time
 
 }
 
-func waitForTimeRequest(client *Client) {
+func waitForRequest(client *Client) {
 	// Connect to the server
 	serverConnection, _ := connectToServer()
 
@@ -73,7 +73,7 @@ func waitForTimeRequest(client *Client) {
 			if err != nil {
 				log.Fatalf("cannot receive %v", err)
 			}
-			if client.id==-1 {
+			if client.id == -1 {
 				client.local_vector_clock.vector_clock = msg.VectorClock
 				client.local_vector_clock.update(client.local_vector_clock, int(msg.ClientId))
 			} else {
@@ -81,7 +81,7 @@ func waitForTimeRequest(client *Client) {
 				client.local_vector_clock.update(incoming_vector_clock, int(msg.ClientId))
 			}
 			client.id = msg.ClientId
-			log.Println("receive msg is ", msg.Content, "current vector clock is", client.local_vector_clock.vector_clock," id is",msg.ClientId)
+			log.Println("receive msg is ", msg.Content, "current vector clock is", client.local_vector_clock.vector_clock, " id is", msg.ClientId)
 		}
 	}()
 	for scanner.Scan() {
