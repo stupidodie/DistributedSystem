@@ -51,10 +51,10 @@ func main() {
 	startServer()
 
 }
-type Client struct{
-	srv proto.Broadcast_SendBroadcastServer
-	client_id int64
 
+type Client struct {
+	srv       proto.Broadcast_SendBroadcastServer
+	client_id int64
 }
 
 func startServer() {
@@ -70,7 +70,7 @@ func startServer() {
 	}
 	log.Printf("Started server at port: %d\n", *port)
 	server := Server{
-		clients:         make(map[int64]Client),	
+		clients:         make(map[int64]Client),
 		start_client_no: 1,
 		BroadcastServer: proto.UnimplementedBroadcastServer{},
 		local_vector_clock: Vector_clock{
@@ -96,23 +96,23 @@ func (s *Server) SendBroadcast(srv proto.Broadcast_SendBroadcastServer) error {
 		switch msg.Type {
 		case int64(join):
 			{
-				s.clients[msg.ClientId] = Client{srv:srv,client_id:s.start_client_no} 
+				s.clients[msg.ClientId] = Client{srv: srv, client_id: s.start_client_no}
 				s.start_client_no++
 				msg.Content = fmt.Sprintf("The client %d is joined ", s.clients[msg.ClientId].client_id)
 				msg.VectorClock = make([]byte, max_vector_size)
-				msg.VectorClock[s.clients[msg.ClientId].client_id]=1
-				log.Println("receive msg from client ",s.clients[msg.ClientId].client_id,"whose clock is ",msg.VectorClock)
+				msg.VectorClock[s.clients[msg.ClientId].client_id] = 1
+				log.Println("receive msg from client ", s.clients[msg.ClientId].client_id, "whose clock is ", msg.VectorClock)
 				s.Broadcast(msg)
 			}
 		case int64(left):
 			{
-				log.Println("receive msg from client ",s.clients[msg.ClientId].client_id,"whose clock is ",msg.VectorClock)
+				log.Println("receive msg from client ", s.clients[msg.ClientId].client_id, "whose clock is ", msg.VectorClock)
 				delete(s.clients, msg.ClientId)
 				s.Broadcast(msg)
 			}
 		case int64(broadcast):
 			{
-				log.Println("receive msg from client ",s.clients[msg.ClientId].client_id,"whose clock is ",msg.VectorClock)
+				log.Println("receive msg from client ", s.clients[msg.ClientId].client_id, "whose clock is ", msg.VectorClock)
 				s.Broadcast(msg)
 			}
 		}
@@ -123,13 +123,13 @@ func (s *Server) Broadcast(msg *proto.Message) {
 	coming_vector_clock := Vector_clock{vector_clock: msg.VectorClock}
 	s.local_vector_clock.update(coming_vector_clock, s.server_id)
 	s.local_vector_clock.update(coming_vector_clock, s.server_id)
-	log.Println("Broadcast message: ", msg.Content, "current vector clock is ", s.local_vector_clock.vector_clock)
+	log.Println("Broadcast message: ", msg.Content, " current vector clock is ", s.local_vector_clock.vector_clock)
 	for index, client := range s.clients {
 		send_msg := proto.Message{
 			Type:        msg.Type,
 			Content:     msg.Content,
 			VectorClock: s.local_vector_clock.vector_clock,
-			ClientId:    s.clients[index].client_id,
+			ClientId:    client.client_id,
 		}
 		if err := client.srv.Send(&send_msg); err != nil {
 			log.Printf("broadcast client %d err: %v\n", index, err)
