@@ -69,7 +69,7 @@ func startServer() {
 		log.Fatalf("Could not create the server %v", err)
 	}
 	log.Printf("Started server at port: %d\n", *port)
-	msg := Server{
+	server := Server{
 		clients:         make(map[int64]Client),	
 		start_client_no: 1,
 		BroadcastServer: proto.UnimplementedBroadcastServer{},
@@ -79,7 +79,7 @@ func startServer() {
 		server_id: 0,
 	}
 	// Register the grpc server and serve its listener
-	proto.RegisterBroadcastServer(grpcServer, &msg)
+	proto.RegisterBroadcastServer(grpcServer, &server)
 	serveError := grpcServer.Serve(listener)
 	if serveError != nil {
 		log.Fatalf("Could not serve listener")
