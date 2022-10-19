@@ -4,15 +4,14 @@ package simpleGuide;
 
 option go_package = "grpc/proto";
 
-message AskForTimeMessage {
-  int64 clientId = 1;
+//Here is the message that the client send to the server
+message Message{
+  int64 type=1;
+  string content=2;
+  bytes vector_clock=3;
+  int64 client_id=4;
 }
 
-message TimeMessage {
-  string serverName = 1;
-  string time = 2;
-}
-
-service TimeAsk {
-  rpc AskForTime(AskForTimeMessage) returns (TimeMessage);
+service Broadcast {
+  rpc SendBroadcast(stream Message) returns (stream Message);
 }

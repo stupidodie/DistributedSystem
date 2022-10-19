@@ -4,17 +4,33 @@ import (
 	"bufio"
 	"context"
 	"flag"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"fmt"
 	"log"
 	"os"
 	proto "simpleGuide/grpc"
 	"strconv"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
+type Vector_clock struct {
+	vector_clock []byte
+}
+
+func (local_clock Vector_clock) update(coming_clock Vector_clock, clock_id int) Vector_clock {
+	for index, clock := range coming_clock.vector_clock {
+		if clock > local_clock.vector_clock[index] {
+			local_clock.vector_clock[index] = clock
+		}
+	}
+	local_clock.vector_clock[clock_id]++
+	return local_clock
+}
+
 type Client struct {
-	id         int
-	portNumber int
+	id                 int64
+	local_vector_clock Vector_clock
 }
 
 var (
@@ -26,18 +42,13 @@ func main() {
 	// Parse the flags to get the port for the client
 	flag.Parse()
 
-	// Create a client
-	client := &Client{
-		id:         1,
-		portNumber: *clientPort,
+	client := Client{
+		id:                 -1,
+		local_vector_clock: Vector_clock{},
 	}
-
+	waitForTimeRequest(&client)
 	// Wait for the client (user) to ask for the time
-	go waitForTimeRequest(client)
 
-	for {
-
-	}
 }
 
 func waitForTimeRequest(client *Client) {
@@ -46,24 +57,53 @@ func waitForTimeRequest(client *Client) {
 
 	// Wait for input in the client terminal
 	scanner := bufio.NewScanner(os.Stdin)
+	stream, err := serverConnection.SendBroadcast(context.Background())
+	stream.Send(&proto.Message{
+		Type:        0,
+		Content:     "",
+		VectorClock: nil,
+		ClientId:    int64(*clientPort),
+	})
+	if err != nil {
+		log.Printf("error is %v happen in joining", err)
+	}
+	go func() {
+		for {
+			msg, err := stream.Recv()
+			if err != nil {
+				log.Fatalf("cannot receive %v", err)
+			}
+			if client.id==-1 {
+				client.local_vector_clock.vector_clock = msg.VectorClock
+				client.local_vector_clock.update(client.local_vector_clock, int(msg.ClientId))
+			} else {
+				incoming_vector_clock := Vector_clock{vector_clock: msg.VectorClock}
+				client.local_vector_clock.update(incoming_vector_clock, int(msg.ClientId))
+			}
+			client.id = msg.ClientId
+			log.Println("receive msg is ", msg.Content, "current vector clock is", client.local_vector_clock.vector_clock," id is",msg.ClientId)
+		}
+	}()
 	for scanner.Scan() {
+
 		input := scanner.Text()
-		log.Printf("Client asked for time with input: %s\n", input)
+		switch input {
+		case "exit":
+			{
+				client.local_vector_clock.update(client.local_vector_clock, int(client.id))
+				stream.Send(&proto.Message{Type: 1, Content: fmt.Sprint("The client is going to left, id :", client.id), VectorClock: client.local_vector_clock.vector_clock, ClientId: int64(*clientPort)})
+				break
+			}
+		default:
+			{
+				client.local_vector_clock.update(client.local_vector_clock, int(client.id))
+				stream.Send(&proto.Message{Type: 2, Content: fmt.Sprint("The client id : ", client.id, " want to broadcast ", input), VectorClock: client.local_vector_clock.vector_clock, ClientId: int64(*clientPort)})
+			}
 
-		// Ask the server for the time
-		timeReturnMessage, err := serverConnection.AskForTime(context.Background(), &proto.AskForTimeMessage{
-			ClientId: int64(client.id),
-		})
-
-		if err != nil {
-			log.Printf(err.Error())
-		} else {
-			log.Printf("Server %s says the time is %s\n", timeReturnMessage.ServerName, timeReturnMessage.Time)
 		}
 	}
 }
-
-func connectToServer() (proto.TimeAskClient, error) {
+func connectToServer() (proto.BroadcastClient, error) {
 	// Dial the server at the specified port.
 	conn, err := grpc.Dial("localhost:"+strconv.Itoa(*serverPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -71,5 +111,5 @@ func connectToServer() (proto.TimeAskClient, error) {
 	} else {
 		log.Printf("Connected to the server at port %d\n", *serverPort)
 	}
-	return proto.NewTimeAskClient(conn), nil
+	return proto.NewBroadcastClient(conn), nil
 }
