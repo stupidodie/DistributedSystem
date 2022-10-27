@@ -1,0 +1,9 @@
+2022/10/27 12:21:22 Log file:8080.txtrecord started.
+2022/10/27 12:21:22 Connected to the server at port 5454
+2022/10/27 12:21:22 received msg: The client 1 is joined   ||current local clock: [2 2 0 0 0 0 0 0 0 0]  id is 1
+2022/10/27 12:21:32 received msg: The client id : 1 said: Hello!  ||current local clock: [4 4 0 0 0 0 0 0 0 0]  id is 1
+2022/10/27 12:21:39 received msg: The client 2 is joined   ||current local clock: [6 5 1 0 0 0 0 0 0 0]  id is 1
+2022/10/27 12:21:49 received msg: The client id : 2 said: Cool!  ||current local clock: [8 6 3 0 0 0 0 0 0 0]  id is 1
+2022/10/27 12:21:59 received msg: The client 3 is joined   ||current local clock: [10 7 3 1 0 0 0 0 0 0]  id is 1
+2022/10/27 12:22:07 received msg: The client id : 3 said: LOL!!!  ||current local clock: [12 8 3 3 0 0 0 0 0 0]  id is 1
+2022/10/27 12:22:47 cannot receive rpc error: code = Unavailable desc = error reading from server: EOF

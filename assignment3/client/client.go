@@ -46,6 +46,17 @@ func main() {
 		id:                 -1,
 		local_vector_clock: Vector_clock{},
 	}
+	//set log file
+	logFileName := strconv.Itoa(*clientPort) + ".txt"
+	file, err := os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.SetOutput(file)
+
+	log.Println("Log file:" + logFileName + "record started.")
+	fmt.Println("I use" + logFileName + "for logging!")
 	waitForRequest(&client)
 	// Wait for the client (user) to ask for the time
 
@@ -66,6 +77,7 @@ func waitForRequest(client *Client) {
 	})
 	if err != nil {
 		log.Printf("error is %v happen in joining", err)
+		fmt.Printf("error is %v happen in joining", err)
 	}
 	go func() {
 		for {
@@ -81,7 +93,8 @@ func waitForRequest(client *Client) {
 				client.local_vector_clock.update(incoming_vector_clock, int(msg.ClientId))
 			}
 			client.id = msg.ClientId
-			log.Println("receive msg is ", msg.Content, "current vector clock is", client.local_vector_clock.vector_clock, " id is", msg.ClientId)
+			log.Println("received msg:", msg.Content, " ||current local clock:", client.local_vector_clock.vector_clock, " id is", msg.ClientId)
+			fmt.Println("received msg:", msg.Content, " ||current local clock:", client.local_vector_clock.vector_clock, " id is", msg.ClientId)
 		}
 	}()
 	for scanner.Scan() {
@@ -97,7 +110,7 @@ func waitForRequest(client *Client) {
 		default:
 			{
 				client.local_vector_clock.update(client.local_vector_clock, int(client.id))
-				stream.Send(&proto.Message{Type: 2, Content: fmt.Sprint("The client id : ", client.id, " want to broadcast ", input), VectorClock: client.local_vector_clock.vector_clock, ClientId: int64(*clientPort)})
+				stream.Send(&proto.Message{Type: 2, Content: fmt.Sprint("The client id : ", client.id, " said: ", input), VectorClock: client.local_vector_clock.vector_clock, ClientId: int64(*clientPort)})
 			}
 
 		}
@@ -110,6 +123,7 @@ func connectToServer() (proto.BroadcastClient, error) {
 		log.Fatalf("Could not connect to port %d", *serverPort)
 	} else {
 		log.Printf("Connected to the server at port %d\n", *serverPort)
+		fmt.Printf("Connected to the server at port %d\n", *serverPort)
 	}
 	return proto.NewBroadcastClient(conn), nil
 }

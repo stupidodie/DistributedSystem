@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	proto "simpleGuide/grpc"
 	"strconv"
 
@@ -48,6 +49,18 @@ func main() {
 	// Get the port from the command line when the server is run
 	flag.Parse()
 
+	//set log file
+	logFileName := strconv.Itoa(*port) + ".txt"
+	file, err := os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.SetOutput(file)
+
+	log.Println("Log file:" + logFileName + "record started.")
+	fmt.Println("I use" + logFileName + "for logging!")
+
 	startServer()
 
 }
@@ -69,6 +82,7 @@ func startServer() {
 		log.Fatalf("Could not create the server %v", err)
 	}
 	log.Printf("Started server at port: %d\n", *port)
+	fmt.Printf("Started server at port: %d\n", *port)
 	server := Server{
 		clients:         make(map[int64]Client),
 		start_client_no: 1,
@@ -102,17 +116,20 @@ func (s *Server) SendBroadcast(srv proto.Broadcast_SendBroadcastServer) error {
 				msg.VectorClock = make([]byte, max_vector_size)
 				msg.VectorClock[s.clients[msg.ClientId].client_id] = 1
 				log.Println("receive msg from client ", s.clients[msg.ClientId].client_id, "whose clock is ", msg.VectorClock)
+				fmt.Println("receive msg from client ", s.clients[msg.ClientId].client_id, "whose clock is ", msg.VectorClock)
 				s.Broadcast(msg)
 			}
 		case int64(left):
 			{
 				log.Println("receive msg from client ", s.clients[msg.ClientId].client_id, "whose clock is ", msg.VectorClock)
+				fmt.Println("receive msg from client ", s.clients[msg.ClientId].client_id, "whose clock is ", msg.VectorClock)
 				delete(s.clients, msg.ClientId)
 				s.Broadcast(msg)
 			}
 		case int64(broadcast):
 			{
 				log.Println("receive msg from client ", s.clients[msg.ClientId].client_id, "whose clock is ", msg.VectorClock)
+				fmt.Println("receive msg from client ", s.clients[msg.ClientId].client_id, "whose clock is ", msg.VectorClock)
 				s.Broadcast(msg)
 			}
 		}
@@ -124,6 +141,7 @@ func (s *Server) Broadcast(msg *proto.Message) {
 	s.local_vector_clock.update(coming_vector_clock, s.server_id)
 	s.local_vector_clock.update(coming_vector_clock, s.server_id)
 	log.Println("Broadcast message: ", msg.Content, " current vector clock is ", s.local_vector_clock.vector_clock)
+	fmt.Println("Broadcast message: ", msg.Content, " current vector clock is ", s.local_vector_clock.vector_clock)
 	for index, client := range s.clients {
 		send_msg := proto.Message{
 			Type:        msg.Type,
