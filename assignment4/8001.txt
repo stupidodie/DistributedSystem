@@ -1,0 +1,31 @@
+2022/11/14 14:47:04 Log file:8001.txtrecord started.
+2022/11/14 14:47:12 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:15 Send token to the next node port is  8002 and receive the reply Receive token 1  from  8001
+
+2022/11/14 14:47:21 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:24 Send token to the next node port is  8002 and receive the reply Receive token 4  from  8001
+
+2022/11/14 14:47:26 current node does not hold token, so just waiting
+2022/11/14 14:47:30 current node does not hold token, so just waiting
+2022/11/14 14:47:30 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:32 The task is  TASK D: node 8001 entered critical section Order is  7
+2022/11/14 14:47:32 The task is  TASK E: node 8001 entered critical section Order is  7
+2022/11/14 14:47:33 Send token to the next node port is  8002 and receive the reply Receive token 7  from  8001
+
+2022/11/14 14:47:39 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:41 The task is  TASK F: node 8001 entered critical section Order is  10
+2022/11/14 14:47:41 current is no task for this node, just handout the token
+2022/11/14 14:47:42 current is no task for this node, just handout the token
+2022/11/14 14:47:42 Send token to the next node port is  8002 and receive the reply Receive token 10  from  8001
+
+2022/11/14 14:47:48 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:50 current is no task for this node, just handout the token
+2022/11/14 14:47:51 current is no task for this node, just handout the token
+2022/11/14 14:47:51 Send token to the next node port is  8002 and receive the reply Receive token 13  from  8001
+
+2022/11/14 14:47:57 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:48:00 Send token to the next node port is  8002 and receive the reply Receive token 16  from  8001
+
+2022/11/14 14:48:06 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:48:09 Send token to the next node port is  8002 and receive the reply Receive token 19  from  8001
+

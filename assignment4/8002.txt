@@ -1,0 +1,25 @@
+2022/11/14 14:46:59 Log file:8002.txtrecord started.
+2022/11/14 14:47:15 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:18 Send token to the next node port is  8000 and receive the reply Receive token 2  from  8002
+
+2022/11/14 14:47:24 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:26 The task is  TASK G: node 8002 entered critical section Order is  5
+2022/11/14 14:47:27 The task is  TASK H: node 8002 entered critical section Order is  5
+2022/11/14 14:47:27 Send token to the next node port is  8000 and receive the reply Receive token 5  from  8002
+
+2022/11/14 14:47:33 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:36 The task is  TASK I: node 8002 entered critical section Order is  8
+2022/11/14 14:47:36 Send token to the next node port is  8000 and receive the reply Receive token 8  from  8002
+
+2022/11/14 14:47:42 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:45 Send token to the next node port is  8000 and receive the reply Receive token 11  from  8002
+
+2022/11/14 14:47:51 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:47:52 current is no task for this node, just handout the token
+2022/11/14 14:47:52 current is no task for this node, just handout the token
+2022/11/14 14:47:54 Send token to the next node port is  8000 and receive the reply Receive token 14  from  8002
+
+2022/11/14 14:48:00 Know I have the token, it will send to another after 3 seconds
+2022/11/14 14:48:03 Send token to the next node port is  8000 and receive the reply Receive token 17  from  8002
+
+2022/11/14 14:48:09 Know I have the token, it will send to another after 3 seconds

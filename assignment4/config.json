@@ -2,25 +2,25 @@
     {
         "id": 8000,
         "tasks": [
-            "TASK A",
-            "TASK B",
-            "TASK C"
+            "TASK A: node 8000 entered critical section",
+            "TASK B: node 8000 entered critical section",
+            "TASK C: node 8000 entered critical section"
         ]
     },
     {
         "id": 8001,
         "tasks": [
-            "TASK D",
-            "TASK E",
-            "TASK F"
+            "TASK D: node 8001 entered critical section",
+            "TASK E: node 8001 entered critical section",
+            "TASK F: node 8001 entered critical section"
         ]
     },
     {
         "id": 8002,
         "tasks": [
-            "TASK G",
-            "TASK H",
-            "TASK I"
+            "TASK G: node 8002 entered critical section",
+            "TASK H: node 8002 entered critical section",
+            "TASK I: node 8002 entered critical section"
         ]
     }
 ]

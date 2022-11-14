@@ -80,6 +80,16 @@ func main() {
 	maxTaskNumber := 2
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	
+	//start logging
+	logFileName := strconv.Itoa(ownPort) + ".txt"
+	file, err := os.OpenFile(logFileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.SetOutput(file)
+	log.Println("Log file:" + logFileName + "record started.")
+	fmt.Println("I use" + logFileName + "for logging!")
 
 	peer := &peer{
 		id:      ownPort,
@@ -124,11 +134,12 @@ func main() {
 		peer.clients[port] = p2p.NewRingClient(conn)
 	}
 
-	fmt.Println("Press enter to send the token to the nextone - if you has")
+	fmt.Println("Press enter to do the task - if you hava a token")
 	go func() {
 		for {
 			if token_has {
 				fmt.Println("Know I have the token, it will send to another after 3 seconds")
+				log.Println("Know I have the token, it will send to another after 3 seconds")
 				time.Sleep(3 * time.Second)
 				token_has = false
 				peer.sendToNextOne()
@@ -140,15 +151,15 @@ func main() {
 		if token_has {
 			if currentTaskId <= maxTaskNumber {
 				fmt.Println("The task is ", ownTasks[currentTaskId], "Order is ", Order)
+				log.Println("The task is ", ownTasks[currentTaskId], "Order is ", Order)
 			} else {
 				fmt.Println("current is no task for this node, just handout the token")
+				log.Println("current is no task for this node, just handout the token")
 			}
 			currentTaskId += 1
-			// token_has=false
-			// send to the next one
-			// peer.sendToNextOne()
 		} else {
 			fmt.Println("current node does not hold token, so just waiting")
+			log.Println("current node does not hold token, so just waiting")
 		}
 
 	}
@@ -172,5 +183,6 @@ func (p *peer) sendToNextOne() {
 	if err != nil {
 		log.Fatalf("Error when sending ping to peer %v: %v", next_node, err)
 	}
-	fmt.Println("Send msg to the next node port is ", next_node, "and receive the reply", reply.Msg)
+	fmt.Println("Send token to the next node port is ", next_node, "and receive the reply", reply.Msg)
+	log.Println("Send token to the next node port is ", next_node, "and receive the reply", reply.Msg)
 }
