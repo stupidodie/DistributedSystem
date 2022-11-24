@@ -23,7 +23,6 @@ const success=0
 const fail=-1
 const exception=1
 // Used to get the user-defined port for the server from the command line
-var port = flag.Int("port", 0, "server port number")
 func main(){
 	startServer()
 	fmt.Println("das")
