@@ -1,0 +1,23 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+package as5;
+
+option go_package = "https://github.com/stupidodie/DistributedSystem/assignment5;as5";
+
+service Trade {
+    rpc Bid (Price) returns(Ack) {}
+    rpc Result (google.protobuf.Empty) returns(Outcome){}
+}
+
+message Price {
+    int32 price = 1;
+}
+
+message Outcome{
+    int32 price=1;
+    bool isFinished=2;
+}
+
+message Ack{
+    int32 ack=1;
+}
